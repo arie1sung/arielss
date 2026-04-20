@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4/25 宜蘭一日遊 — 大家來排行程！</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", sans-serif; background: #F5F4F0; color: #1a1a1a; padding-bottom: 60px; }
+
+.top-header { text-align: center; padding: 20px 16px 0; }
+.page-title { font-size: 21px; font-weight: 500; margin-bottom: 4px; }
+.page-sub { font-size: 13px; color: #777; margin-bottom: 10px; }
+.date-badge { display: inline-block; background: #E6F1FB; color: #185FA5; font-size: 12px; font-weight: 500; padding: 4px 14px; border-radius: 20px; margin-bottom: 18px; }
+
+.tab-bar { display: flex; max-width: 600px; margin: 0 auto 20px; padding: 0 16px; border-bottom: 1.5px solid #e0ddd6; }
+.tab-btn { flex: 1; padding: 9px 4px; font-size: 13px; font-weight: 500; color: #999; background: transparent; border: none; border-bottom: 2.5px solid transparent; margin-bottom: -1.5px; cursor: pointer; }
+.tab-btn.active { color: #185FA5; border-bottom-color: #378ADD; }
+
+.tab-panel { display: none; padding: 0 16px; max-width: 600px; margin: 0 auto; }
+.tab-panel.active { display: block; }
+
+/* 出發資訊 */
+.depart-box { background: #fff; border: 0.5px solid #ddd; border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; }
+.depart-label { font-size: 11px; font-weight: 500; color: #aaa; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 10px; }
+.car-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 7px; }
+.car-badge { font-size: 11px; font-weight: 500; padding: 2px 9px; border-radius: 20px; white-space: nowrap; margin-top: 2px; flex-shrink: 0; }
+.cx1 { background: #FAEEDA; color: #854F0B; }
+.cgolf { background: #E6F1FB; color: #185FA5; }
+.car-name { font-size: 13px; font-weight: 500; color: #1a1a1a; }
+.car-note { font-size: 12px; color: #888; margin-top: 1px; line-height: 1.5; }
+.depart-foot { font-size: 11px; color: #bbb; margin-top: 8px; padding-top: 8px; border-top: 0.5px solid #eee; }
+
+/* 時段區塊 */
+.slot-block { margin-bottom: 24px; }
+.slot-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.slot-time-badge { background: #1a1a1a; color: #fff; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+.slot-title { font-size: 14px; font-weight: 500; color: #1a1a1a; }
+.slot-note { font-size: 11px; color: #aaa; margin-left: auto; white-space: nowrap; }
+
+.option-grid { display: flex; flex-direction: column; gap: 8px; }
+.option-card { background: #fff; border: 1.5px solid #e0ddd6; border-radius: 12px; padding: 12px 14px; cursor: pointer; transition: border-color 0.12s, background 0.12s; user-select: none; }
+.option-card:hover { border-color: #bbb; }
+.option-card.picked { border: 2px solid #378ADD; background: #f3f8ff; }
+.option-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.option-name { font-size: 14px; font-weight: 500; color: #1a1a1a; }
+.option-badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+.badge-free { background: #EAF3DE; color: #3B6D11; }
+.badge-book { background: #FAEEDA; color: #854F0B; }
+.badge-paid { background: #E6F1FB; color: #185FA5; }
+.badge-food { background: #EEEDFE; color: #3C3489; }
+.option-desc { font-size: 12px; color: #888; margin-top: 4px; line-height: 1.5; }
+.option-detail-toggle { font-size: 11px; color: #378ADD; margin-top: 5px; cursor: pointer; display: inline-block; }
+.option-detail { display: none; margin-top: 8px; background: #f8f7f4; border-radius: 8px; padding: 9px 11px; }
+.option-detail.open { display: block; }
+.drow { display: flex; gap: 6px; font-size: 12px; color: #666; line-height: 1.5; margin-bottom: 4px; }
+.drow:last-child { margin-bottom: 0; }
+.drow-icon { flex-shrink: 0; font-size: 13px; }
+.pick-indicator { display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #ccc; flex-shrink: 0; margin-top: 1px; }
+.option-card.picked .pick-indicator { background: #378ADD; border-color: #378ADD; }
+.pick-check { font-size: 11px; color: transparent; }
+.option-card.picked .pick-check { color: #fff; }
+
+/* 行程摘要 */
+.summary-box { background: #fff; border: 0.5px solid #e0ddd6; border-radius: 14px; padding: 16px 18px; margin-bottom: 20px; }
+.summary-title { font-size: 11px; font-weight: 500; color: #aaa; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 14px; }
+.summary-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+.summary-time { font-size: 11px; color: #bbb; min-width: 38px; padding-top: 2px; }
+.summary-dot { width: 8px; height: 8px; border-radius: 50%; background: #378ADD; margin-top: 4px; flex-shrink: 0; }
+.summary-dot.empty { background: #ddd; }
+.summary-line-wrap { display: flex; flex-direction: column; align-items: center; }
+.summary-vline { width: 1px; height: 14px; background: #e0ddd6; margin: 2px 0; }
+.summary-content { flex: 1; }
+.summary-name { font-size: 13px; font-weight: 500; color: #1a1a1a; }
+.summary-sub { font-size: 11px; color: #aaa; margin-top: 1px; }
+.summary-empty { font-size: 12px; color: #ccc; font-style: italic; }
+.share-btn { width: 100%; padding: 12px; border-radius: 10px; background: #378ADD; color: #fff; font-size: 14px; font-weight: 500; border: none; cursor: pointer; margin-top: 4px; }
+.share-btn:active { opacity: 0.85; }
+
+/* 小吃頁 */
+.food-section-label { font-size: 11px; font-weight: 500; color: #aaa; letter-spacing: 0.07em; text-transform: uppercase; margin: 0 0 10px; }
+.food-card { background: #fff; border: 0.5px solid #e0ddd6; border-radius: 12px; padding: 12px 16px; margin-bottom: 10px; }
+.food-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 5px; }
+.food-name { font-size: 14px; font-weight: 500; }
+.food-desc { font-size: 12px; color: #888; line-height: 1.5; margin-bottom: 7px; }
+.food-meta { font-size: 11px; color: #999; line-height: 1.7; }
+.food-open { display: inline-block; background: #EAF3DE; color: #3B6D11; font-size: 11px; padding: 1px 8px; border-radius: 20px; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div class="top-header">
+  <p class="page-title">4/25 宜蘭一日遊</p>
+  <p class="page-sub">每個時段選一個你最想去的，最後看大家的行程！</p>
+  <span class="date-badge">楊梅出發 ＋ 山鼻接小阿姨</span>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('plan', this)">選行程</button>
+  <button class="tab-btn" onclick="switchTab('summary', this)">我的行程</button>
+  <button class="tab-btn" onclick="switchTab('food', this)">小吃 ＆ 晚餐</button>
+</div>
+
+<!-- 選行程 -->
+<div class="tab-panel active" id="tab-plan">
+
+  <div class="depart-box">
+    <div class="depart-label">出發安排</div>
+    <div class="car-row">
+      <span class="car-badge cx1">X1</span>
+      <div><div class="car-name">媽媽 ＋ 大阿姨</div>
+      <div class="car-note">楊梅 6:30 出發 → 山鼻接小阿姨＋姨丈 → 7:25 前進雪隧 → 約 8:20 抵達</div></div>
+    </div>
+    <div class="car-row">
+      <span class="car-badge cgolf">Golf</span>
+      <div><div class="car-name">爸爸 ＋ 阿公阿嬤 ＋ 小孩</div>
+      <div class="car-note">楊梅 7:00 出發 → 直走國五 → 約 8:10 抵達，景點碰面</div></div>
+    </div>
+    <div class="depart-foot">兩台約 8:10–8:20 碰面｜晚餐後送小阿姨回山鼻，約 22:00 回楊梅</div>
+  </div>
+
+  <!-- 時段 1 -->
+  <div class="slot-block">
+    <div class="slot-header">
+      <span class="slot-time-badge">08:30–11:30</span>
+      <span class="slot-title">上午主景點</span>
+      <span class="slot-note">選 1 個</span>
+    </div>
+    <div class="option-grid">
+      <div class="option-card" onclick="pick(this,'slot1','心花鹿 Fun 農場','東山','需預約')">
+        <div class="option-top">
+          <div><div class="option-name">心花鹿 Fun 農場</div><div class="option-desc">餵羊駝、鹿、水豚、袋鼠，近 2 歲可以玩，導覽員親切。停留約 2 小時。</div></div>
+          <div><span class="option-badge badge-book">需預約</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-a1')">▸ 詳情</span>
+        <div class="option-detail" id="d-a1">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣東山鄉大埤一路 199 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>週二～日 09:30–17:00，週一公休｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">📞</span>03-961-1908</div>
+          <div class="drow"><span class="drow-icon">💰</span>約 NT$350/人，含飼料</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot1','真我休閒農場','三星','需預約')">
+        <div class="option-top">
+          <div><div class="option-name">真我休閒農場</div><div class="option-desc">採蔥 ＋ DIY 蔥油捲，全家一起動手做，5 星評價，有趣回憶。</div></div>
+          <div><span class="option-badge badge-book">需預約</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-a2')">▸ 詳情</span>
+        <div class="option-detail" id="d-a2">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣三星鄉東興路 13 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>每日 09:00–17:30｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">📞</span>0928-576-801</div>
+          <div class="drow"><span class="drow-icon">💰</span>約 NT$500/人（採蔥＋DIY）</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot1','國立傳統藝術中心','五結','免費停車')">
+        <div class="option-top">
+          <div><div class="option-name">國立傳統藝術中心</div><div class="option-desc">傳統老街、廟口小吃、歌仔戲，阿公阿嬤超有共鳴，廣場讓小孩跑個夠。</div></div>
+          <div><span class="option-badge badge-paid">售票</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-a3')">▸ 詳情</span>
+        <div class="option-detail" id="d-a3">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣五結鄉五濱路二段 201 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>每日 09:00–18:00｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">💰</span>全票 NT$150，65 歲以上 NT$75，2 歲以下免費</div>
+          <div class="drow"><span class="drow-icon">🅿️</span>園區大停車場，最高 NT$60</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot1','Homing 農場','礁溪','')">
+        <div class="option-top">
+          <div><div class="option-name">Homing 農場 🦙</div><div class="option-desc">礁溪超人氣小農場，水豚握手、羊駝刷毛，動物乾淨溫馴，19 個月大的小孩都大讚。</div></div>
+          <div><span class="option-badge badge-book">需預約</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-a4')">▸ 詳情</span>
+        <div class="option-detail" id="d-a4">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣礁溪鄉大文路 18-17 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>週三公休，09:00–17:00｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">📞</span>0987-129-888</div>
+          <div class="drow"><span class="drow-icon">💰</span>約 NT$350–450/人，含飼料</div>
+          <div class="drow"><span class="drow-icon">🚗</span>從礁溪市區約 10 分鐘</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot1','光新農場','東山','')">
+        <div class="option-top">
+          <div><div class="option-name">光新農場</div><div class="option-desc">挖蛤蜊、餵動物、DIY 體驗，環境乾淨，一個上午可以玩好幾樣，食物也很好吃。</div></div>
+          <div><span class="option-badge badge-paid">售票</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-a5')">▸ 詳情</span>
+        <div class="option-detail" id="d-a5">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣東山鄉廣化三路 12 巷 12 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>週三公休，09:00–18:00｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">📞</span>03-951-3236</div>
+          <div class="drow"><span class="drow-icon">💰</span>入場 NT$200/人，可折抵消費</div>
+          <div class="drow"><span class="drow-icon">🚗</span>從宜蘭市區約 15 分鐘</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot1','金車生技水族館','礁溪','')">
+        <div class="option-top">
+          <div><div class="option-name">金車生技水族館 🦈</div><div class="option-desc">全台唯一可親手餵鯊魚！室內冷氣，老人小孩都能參與，雨天備選首選。</div></div>
+          <div><span class="option-badge badge-paid">售票</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-a6')">▸ 詳情</span>
+        <div class="option-detail" id="d-a6">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣礁溪鄉滋武蘭路 162-13 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>每日 08:00–17:00，全年無休｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">💰</span>入場 NT$200，餵鯊魚體驗另付 NT$300</div>
+          <div class="drow"><span class="drow-icon">🚗</span>從礁溪市區約 10 分鐘</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 時段 2 -->
+  <div class="slot-block">
+    <div class="slot-header">
+      <span class="slot-time-badge">11:30–13:00</span>
+      <span class="slot-title">午餐</span>
+      <span class="slot-note">選 1 個</span>
+    </div>
+    <div class="option-grid">
+      <div class="option-card" onclick="pick(this,'slot2','蘭陽溪口親子餐廳','五結','')">
+        <div class="option-top">
+          <div><div class="option-name">蘭陽溪口親子餐廳</div><div class="option-desc">室內遊戲區 ＋ 戶外小火車，大人安心吃，老人家有冷氣坐。</div></div>
+          <div><span class="option-badge badge-book">建議訂位</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-b1')">▸ 詳情</span>
+        <div class="option-detail" id="d-b1">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣五結鄉西濱路一段 133 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>週四～日 11:30–20:00，週二三公休｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">📞</span>0929-338-803</div>
+          <div class="drow"><span class="drow-icon">💰</span>均消 NT$350–450/人</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot2','遊戲‧創意中式定食','宜蘭市','')">
+        <div class="option-top">
+          <div><div class="option-name">遊戲‧創意中式定食</div><div class="option-desc">二樓兒童遊戲室（球池、溜滑梯、樂高），大人好好吃飯。</div></div>
+          <div><span class="option-badge badge-book">建議訂位</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-b2')">▸ 詳情</span>
+        <div class="option-detail" id="d-b2">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣宜蘭市陽明一路 126 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>週二公休，11:00–14:00 / 17:00–20:00｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">📞</span>0910-218-229</div>
+          <div class="drow"><span class="drow-icon">💰</span>均消 NT$400–500/人</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot2','傳藝中心內用餐','五結（傳藝內）','')">
+        <div class="option-top">
+          <div><div class="option-name">傳藝中心內用餐</div><div class="option-desc">不用移車，老街多家台式小吃，邊逛邊吃，步調最輕鬆。</div></div>
+          <div><span class="option-badge badge-free">不用預約</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-b3')">▸ 詳情</span>
+        <div class="option-detail" id="d-b3">
+          <div class="drow"><span class="drow-icon">🍜</span>老街攤位隨意逛隨意吃，或合菜餐廳坐下來慢慢吃</div>
+          <div class="drow"><span class="drow-icon">💰</span>均消 NT$200–350/人</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot2','水鹿咖啡親子館','礁溪','')">
+        <div class="option-top">
+          <div><div class="option-name">水鹿咖啡親子館</div><div class="option-desc">親子餐廳＋小動物，用餐同時可以看鹿、餵動物，室內外都有，假日親子熱門。</div></div>
+          <div><span class="option-badge badge-book">建議訂位</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-b4')">▸ 詳情</span>
+        <div class="option-detail" id="d-b4">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣礁溪鄉文德路 3-15 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>週一二公休，10:00–19:30｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">📞</span>03-987-4997</div>
+          <div class="drow"><span class="drow-icon">💰</span>均消 NT$350–500/人（含鍋物＋遊戲）</div>
+          <div class="drow"><span class="drow-icon">🚗</span>從礁溪市區約 10 分鐘</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 時段 3 -->
+  <div class="slot-block">
+    <div class="slot-header">
+      <span class="slot-time-badge">13:00–15:30</span>
+      <span class="slot-title">下午景點</span>
+      <span class="slot-note">選 1 個</span>
+    </div>
+    <div class="option-grid">
+      <div class="option-card" onclick="pick(this,'slot3','大碗公溜滑梯','礁溪','')">
+        <div class="option-top">
+          <div><div class="option-name">大碗公溜滑梯</div><div class="option-desc">免費！超大石頭溜滑梯，湖景漂亮，阿公阿嬤坐著拍好多照。</div></div>
+          <div><span class="option-badge badge-free">免費</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-c1')">▸ 詳情</span>
+        <div class="option-detail" id="d-c1">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣礁溪鄉環湖路 1 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>全天開放，免費</div>
+          <div class="drow"><span class="drow-icon">🅿️</span>旁邊收費停車場，假日稍早到可找到位</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot3','冬山河親水公園','五結','')">
+        <div class="option-top">
+          <div><div class="option-name">冬山河親水公園</div><div class="option-desc">超大草地 ＋ 水岸步道，小孩衝刺放電，老人家坐著吹風。</div></div>
+          <div><span class="option-badge badge-free">免費</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-c2')">▸ 詳情</span>
+        <div class="option-detail" id="d-c2">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣五結鄉親河路二段 2 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>每日 08:00–17:00，免費入場</div>
+          <div class="drow"><span class="drow-icon">🅿️</span>園區停車場 NT$50</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot3','礁溪二龍之心公園','礁溪','')">
+        <div class="option-top">
+          <div><div class="option-name">礁溪二龍之心公園</div><div class="option-desc">橋下全遮蔭不怕曬，兒童設施豐富，免費停車有廁所。</div></div>
+          <div><span class="option-badge badge-free">免費</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-c3')">▸ 詳情</span>
+        <div class="option-detail" id="d-c3">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣礁溪鄉奇武蘭路 95 巷 97 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>全天開放，免費</div>
+          <div class="drow"><span class="drow-icon">🅿️</span>對面有免費停車場</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot3','積木方舟博物館','宜蘭市','')">
+        <div class="option-top">
+          <div><div class="option-name">積木方舟博物館 🧱</div><div class="option-desc">LEGO 歷史展 ＋ 免費積木玩耍區，室內冷氣，大人小孩都有看頭，還有 DIY 體驗。</div></div>
+          <div><span class="option-badge badge-paid">售票</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-c4')">▸ 詳情</span>
+        <div class="option-detail" id="d-c4">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣宜蘭市憲政北路 2 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>週三公休，10:00–17:00｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">💰</span>全票 NT$220，含積木小禮</div>
+          <div class="drow"><span class="drow-icon">🚗</span>宜蘭市中心，停車方便</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot3','三隻小豬 DIY 親子空間','宜蘭市','')">
+        <div class="option-top">
+          <div><div class="option-name">三隻小豬 DIY 親子空間 🐷</div><div class="option-desc">做彩繪存錢筒、相框等手作，全家人一起動手，評價 5 星，約停留 1.5–2 小時。</div></div>
+          <div><span class="option-badge badge-book">需預約</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-c5')">▸ 詳情</span>
+        <div class="option-detail" id="d-c5">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣宜蘭市宜中路 145 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>週一二公休，10:30–16:00｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">📞</span>0963-606-323</div>
+          <div class="drow"><span class="drow-icon">💰</span>約 NT$350–500/人（含 DIY 作品帶回家）</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot3','木育森林','羅東','')">
+        <div class="option-top">
+          <div><div class="option-name">木育森林</div><div class="option-desc">全木造玩具體驗空間，室內冷氣，有木頭積木、迷宮、闖關遊戲，適合全年齡，免費入場。</div></div>
+          <div><span class="option-badge badge-free">免費</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-c6')">▸ 詳情</span>
+        <div class="option-detail" id="d-c6">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣羅東鎮中正北路 118 號（Forest Art Gallery）</div>
+          <div class="drow"><span class="drow-icon">🕘</span>每日 09:00–17:00，全年無休｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">💰</span>免費入場，DIY 體驗另計</div>
+          <div class="drow"><span class="drow-icon">🚗</span>羅東市中心，停車方便</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 時段 4 -->
+  <div class="slot-block">
+    <div class="slot-header">
+      <span class="slot-time-badge">15:30–17:30</span>
+      <span class="slot-title">黃昏場</span>
+      <span class="slot-note">選 1 個</span>
+    </div>
+    <div class="option-grid">
+      <div class="option-card" onclick="pick(this,'slot4','礁溪溫泉公園泡腳','礁溪','')">
+        <div class="option-top">
+          <div><div class="option-name">礁溪溫泉公園泡腳</div><div class="option-desc">免費公共泡腳池，大人腳放鬆，小孩在旁邊跑，阿公阿嬤最愛。</div></div>
+          <div><span class="option-badge badge-free">免費</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-d1')">▸ 詳情</span>
+        <div class="option-detail" id="d-d1">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣礁溪鄉公園路 16 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>08:00–22:00，免費泡腳</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot4','買伴手禮 ＋ 玉田香腸','礁溪老街','')">
+        <div class="option-top">
+          <div><div class="option-name">買伴手禮 ＋ 玉田香腸</div><div class="option-desc">鴨賞、牛舌餅採購，廟旁玉田炭烤香腸是礁溪排隊名物，大腸包小腸必吃！</div></div>
+          <div><span class="option-badge badge-free">逛街</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-d2')">▸ 詳情</span>
+        <div class="option-detail" id="d-d2">
+          <div class="drow"><span class="drow-icon">📍</span>玉田炭烤香腸：礁溪鄉玉民路 229-1 號（媽祖廟旁）</div>
+          <div class="drow"><span class="drow-icon">🕘</span>週二～日 10:00–17:30，週一公休｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">💰</span>香腸 NT$35，大腸包小腸 NT$65</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot4','樂色山積木王國','宜蘭市','')">
+        <div class="option-top">
+          <div><div class="option-name">樂色山積木王國</div><div class="option-desc">室內冷氣，LEGO 風格藝術館，大人小孩都有看頭，天氣不好的備選。</div></div>
+          <div><span class="option-badge badge-paid">售票</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-d3')">▸ 詳情</span>
+        <div class="option-detail" id="d-d3">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣宜蘭市東津一路 192 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>週三公休，09:00–17:00｜4/25（週六）✅</div>
+          <div class="drow"><span class="drow-icon">💰</span>全票 NT$200，可折抵消費 NT$100</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot4','宜蘭童樂親子館','宜蘭市','')">
+        <div class="option-top">
+          <div><div class="option-name">宜蘭童樂親子館</div><div class="option-desc">室內大型遊戲場，球池、彈跳床、溜滑梯，冷氣舒適，老人家坐著等很輕鬆。</div></div>
+          <div><span class="option-badge badge-paid">售票</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-d4')">▸ 詳情</span>
+        <div class="option-detail" id="d-d4">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣宜蘭市宜興路一段 159 號 2 樓</div>
+          <div class="drow"><span class="drow-icon">🕘</span>每日 11:00–22:00，全年無休｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">📞</span>03-933-0008</div>
+          <div class="drow"><span class="drow-icon">💰</span>均消 NT$200–300/人，含代幣</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot4','美拍玩很大 OMG 畫框館','五結','')">
+        <div class="option-top">
+          <div><div class="option-name">美拍玩很大 OMG 畫框館 🖼️</div><div class="option-desc">走入畫框世界的趣味展館，室內冷氣，DIY 小體驗帶回家，大人拍照拍個夠！</div></div>
+          <div><span class="option-badge badge-paid">售票</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-d5')">▸ 詳情</span>
+        <div class="option-detail" id="d-d5">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣五結鄉五結路三段 81 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>週二三四公休，週五～一 09:00–17:00｜4/25（週六）✅</div>
+          <div class="drow"><span class="drow-icon">💰</span>全票 NT$200，含 DIY 體驗 NT$100 折抵</div>
+          <div class="drow"><span class="drow-icon">🚗</span>從五結傳藝約 5 分鐘</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 時段 5 -->
+  <div class="slot-block">
+    <div class="slot-header">
+      <span class="slot-time-badge">17:30–19:30</span>
+      <span class="slot-title">晚餐</span>
+      <span class="slot-note">選 1 個</span>
+    </div>
+    <div class="option-grid">
+      <div class="option-card" onclick="pick(this,'slot5','橦樹園特色料理','羅東','')">
+        <div class="option-top">
+          <div><div class="option-name">橦樹園特色料理</div><div class="option-desc">40 年老師傅台菜，招牌芋泥西魯肉、清蒸魚超厲害，阿公阿嬤一定愛。</div></div>
+          <div><span class="option-badge badge-book">需訂位</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-e1')">▸ 詳情</span>
+        <div class="option-detail" id="d-e1">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣羅東鎮中山路四段 75 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>週一公休，17:00–21:00｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">📞</span>03-951-1398</div>
+          <div class="drow"><span class="drow-icon">💰</span>均消 NT$350–450/人</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot5','伍柒海鮮手作料理','宜蘭市','')">
+        <div class="option-top">
+          <div><div class="option-name">伍柒海鮮手作料理</div><div class="option-desc">在地私房海鮮，透抽米粉湯必點，食材新鮮，不是觀光客餐廳的真實好味道。</div></div>
+          <div><span class="option-badge badge-book">需訂位</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-e2')">▸ 詳情</span>
+        <div class="option-detail" id="d-e2">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣宜蘭市健康路三段 57 號 1 樓</div>
+          <div class="drow"><span class="drow-icon">🕘</span>週一二公休，17:30–20:30｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">📞</span>0907-344-957</div>
+          <div class="drow"><span class="drow-icon">💰</span>均消 NT$400–500/人</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot5','橘心手作料理','礁溪','')">
+        <div class="option-top">
+          <div><div class="option-name">橘心手作料理</div><div class="option-desc">礁溪人氣台菜，離雪隧最近，吃完直接回程最順，動線最佳。</div></div>
+          <div><span class="option-badge badge-book">需訂位</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-e3')">▸ 詳情</span>
+        <div class="option-detail" id="d-e3">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣礁溪鄉玉龍路二段 460-1 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>週三公休，17:00–20:30｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">📞</span>0972-900-388</div>
+          <div class="drow"><span class="drow-icon">💰</span>均消 NT$400/人</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot5','年年小館','宜蘭市','')">
+        <div class="option-top">
+          <div><div class="option-name">年年小館</div><div class="option-desc">台式家常菜，滷肉飯全宜蘭數一數二，價格實惠，停車方便，大家族首選。</div></div>
+          <div><span class="option-badge badge-free">不用預約</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-e4')">▸ 詳情</span>
+        <div class="option-detail" id="d-e4">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣宜蘭市環市東路二段 777 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>週二公休，17:00–21:00｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">📞</span>03-937-3016</div>
+          <div class="drow"><span class="drow-icon">💰</span>均消 NT$250–350/人，CP 值高</div>
+        </div>
+      </div>
+      <div class="option-card" onclick="pick(this,'slot5','海手餐廳','宜蘭市','')">
+        <div class="option-top">
+          <div><div class="option-name">海手餐廳</div><div class="option-desc">海鮮合菜，空間大適合大家族，可大桌包場，地點好停車，評價穩定。</div></div>
+          <div><span class="option-badge badge-book">需訂位</span><div class="pick-indicator" style="margin-top:8px"><span class="pick-check">✓</span></div></div>
+        </div>
+        <span class="option-detail-toggle" onclick="toggleD(event,'d-e5')">▸ 詳情</span>
+        <div class="option-detail" id="d-e5">
+          <div class="drow"><span class="drow-icon">📍</span>宜蘭縣宜蘭市環市東路一段 161 號</div>
+          <div class="drow"><span class="drow-icon">🕘</span>每日 11:30–14:30 / 17:30–21:00｜4/25 ✅</div>
+          <div class="drow"><span class="drow-icon">📞</span>03-925-4567</div>
+          <div class="drow"><span class="drow-icon">💰</span>均消 NT$400–500/人</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="share-btn" onclick="goSummary()">查看我的行程 →</button>
+
+</div>
+
+<!-- 我的行程 -->
+<div class="tab-panel" id="tab-summary">
+  <div class="summary-box">
+    <div class="summary-title">你選的行程</div>
+    <div id="summary-content"></div>
+  </div>
+  <button class="share-btn" onclick="switchTab('plan', document.querySelectorAll('.tab-btn')[0])">← 回去修改</button>
+</div>
+
+<!-- 小吃 & 晚餐 -->
+<div class="tab-panel" id="tab-food">
+
+  <div class="food-section-label" style="margin-top:4px">必吃小吃</div>
+
+  <div class="food-card">
+    <div class="food-top"><div class="food-name">玉田炭烤香腸</div><span class="option-badge badge-book">礁溪廟旁</span></div>
+    <div class="food-desc">就是你說的那個！礁溪慈天宮媽祖廟旁，大腸包小腸加春捲皮是獨門吃法，炭烤香腸皮脆多汁，外地人很難找到這個味道。</div>
+    <div class="food-meta">📍 礁溪鄉玉民路 229-1 號（媽祖廟旁）<br>🕘 週二～日 10:00–17:30，週一公休｜💰 香腸 NT$35，大腸包小腸 NT$65</div>
+    <span class="food-open">4/25（週六）✅ 有開</span>
+  </div>
+
+  <div class="food-card">
+    <div class="food-top"><div class="food-name">礁溪香腸伯</div><span class="option-badge badge-book">礁溪</span></div>
+    <div class="food-desc">礁溪另一家大腸包小腸名店，加春捲皮包法一樣獨特，玉田買不到時可以來這，兩家都是礁溪必吃。</div>
+    <div class="food-meta">📍 礁溪鄉五峰路（近礁溪路口）<br>🕘 每日 10:00–17:45｜💰 均消 NT$50–100</div>
+    <span class="food-open">4/25（週六）✅ 有開</span>
+  </div>
+
+  <div class="food-card">
+    <div class="food-top"><div class="food-name">文昌炸醬麵</div><span class="option-badge badge-free">宜蘭市</span></div>
+    <div class="food-desc">宜蘭市超老店，炸醬麵 ＋ 餛飩湯絕配，早上六點就開，均消不到 NT$100，阿公阿嬤早餐或回程點心都很適合。</div>
+    <div class="food-meta">📍 宜蘭市文昌路 37 號<br>🕘 週二～日 06:00–14:00，週一公休｜💰 均消 NT$60–100</div>
+    <span class="food-open">4/25（週六）✅ 有開</span>
+  </div>
+
+  <div class="food-card">
+    <div class="food-top"><div class="food-name">公正包子</div><span class="option-badge badge-free">宜蘭市</span></div>
+    <div class="food-desc">宜蘭最知名小籠包，皮薄湯多，回程順帶一盒給阿公阿嬤當點心。賣完為止，建議下午前去買。</div>
+    <div class="food-meta">📍 宜蘭市泰山路 25-1 號<br>🕘 週一公休，10:00–15:00（賣完為止）｜💰 NT$10/顆</div>
+    <span class="food-open">4/25（週六）✅ 有開</span>
+  </div>
+
+  <div class="food-card">
+    <div class="food-top"><div class="food-name">財記臭豆腐（羅東夜市）</div><span class="option-badge badge-free">羅東</span></div>
+    <div class="food-desc">羅東夜市排隊名攤，炸臭豆腐外酥內嫩，麻辣湯豆腐也超讚。晚餐吃早的話，飯後當宵夜點心超適合。</div>
+    <div class="food-meta">📍 羅東鎮公正路 110 號<br>🕘 週二公休，14:00–22:00｜💰 均消 NT$60–100</div>
+    <span class="food-open">4/25（週六）✅ 有開</span>
+  </div>
+
+  <div class="food-section-label" style="margin-top:20px">伴手禮</div>
+
+  <div class="food-card">
+    <div class="food-top"><div class="food-name">鴨賞 ＆ 牛舌餅</div><span class="option-badge badge-free">礁溪老街</span></div>
+    <div class="food-desc">宜蘭最經典伴手禮。鴨賞是煙燻鴨肉，牛舌餅是薄脆餅乾，礁溪老街一帶很多店，建議多買幾家比較味道。</div>
+    <div class="food-meta">📍 礁溪鄉溫泉路、中山路二段一帶<br>🕘 各店不一，假日大多 10:00–20:00</div>
+  </div>
+
+</div>
+
+<script>
+const selections = { slot1: null, slot2: null, slot3: null, slot4: null, slot5: null };
+const slotTimes = { slot1: '08:30', slot2: '11:30', slot3: '13:00', slot4: '15:30', slot5: '17:30' };
+const slotLabels = { slot1: '上午主景點', slot2: '午餐', slot3: '下午景點', slot4: '黃昏場', slot5: '晚餐' };
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  btn.classList.add('active');
+  if (tab === 'summary') renderSummary();
+}
+
+function toggleD(e, id) {
+  e.stopPropagation();
+  const el = document.getElementById(id);
+  const t = e.target;
+  if (el.classList.contains('open')) { el.classList.remove('open'); t.textContent = '▸ 詳情'; }
+  else { el.classList.add('open'); t.textContent = '▾ 收起'; }
+}
+
+function pick(card, slot, name, location, tag) {
+  if (event.target.classList.contains('option-detail-toggle')) return;
+  const prev = selections[slot];
+  document.querySelectorAll('#tab-plan .option-card').forEach(c => {
+    if (c.getAttribute('onclick') && c.getAttribute('onclick').includes("'" + slot + "'")) {
+      c.classList.remove('picked');
+    }
+  });
+  if (prev === name) {
+    selections[slot] = null;
+  } else {
+    card.classList.add('picked');
+    selections[slot] = name;
+    selections[slot + '_loc'] = location;
+  }
+}
+
+function goSummary() {
+  renderSummary();
+  const btn = document.querySelectorAll('.tab-btn')[1];
+  switchTab('summary', btn);
+  btn.classList.add('active');
+}
+
+function renderSummary() {
+  const fixedItems = [
+    { time: '06:30 / 07:00', name: '出發', sub: 'X1 從楊梅繞山鼻接小阿姨｜Golf 直走國五', fixed: true },
+    { time: '08:10–08:20', name: '碰面', sub: '兩台車在第一個景點會合', fixed: true },
+  ];
+  const slots = ['slot1','slot2','slot3','slot4','slot5'];
+  const endItems = [
+    { time: '19:30', name: '賦歸', sub: '送小阿姨回山鼻，約 22:00 回楊梅', fixed: true },
+  ];
+  let html = '';
+  fixedItems.forEach(item => {
+    html += `<div class="summary-row"><span class="summary-time">${item.time}</span><div class="summary-line-wrap"><div class="summary-dot"></div><div class="summary-vline"></div></div><div class="summary-content"><div class="summary-name">${item.name}</div><div class="summary-sub">${item.sub}</div></div></div>`;
+  });
+  slots.forEach(slot => {
+    const name = selections[slot];
+    const loc = selections[slot + '_loc'] || '';
+    const time = slotTimes[slot];
+    const label = slotLabels[slot];
+    if (name) {
+      html += `<div class="summary-row"><span class="summary-time">${time}</span><div class="summary-line-wrap"><div class="summary-dot"></div><div class="summary-vline"></div></div><div class="summary-content"><div class="summary-name">${name}</div><div class="summary-sub">${label}｜${loc}</div></div></div>`;
+    } else {
+      html += `<div class="summary-row"><span class="summary-time">${time}</span><div class="summary-line-wrap"><div class="summary-dot empty"></div><div class="summary-vline"></div></div><div class="summary-content"><span class="summary-empty">尚未選擇${label}</span></div></div>`;
+    }
+  });
+  endItems.forEach(item => {
+    html += `<div class="summary-row"><span class="summary-time">${item.time}</span><div class="summary-line-wrap"><div class="summary-dot"></div></div><div class="summary-content"><div class="summary-name">${item.name}</div><div class="summary-sub">${item.sub}</div></div></div>`;
+  });
+  document.getElementById('summary-content').innerHTML = html;
+}
+</script>
+</body>
+</html>
